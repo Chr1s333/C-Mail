@@ -54,3 +54,9 @@ db.sqlite3
 .pyre/
 .pytype/
 cython_debug/
+
+#Google auth
+client_secret_582923895190-dp0pq4t2mdivk1eea22eareahhclr476.apps.googleusercontent.com.json
+
+#token pickle
+token.pickle
