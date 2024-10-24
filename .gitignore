@@ -57,6 +57,6 @@ cython_debug/
 
 #Google auth
 client_secret_582923895190-dp0pq4t2mdivk1eea22eareahhclr476.apps.googleusercontent.com.json
-
+mass-mailer-application-firebase-adminsdk-ymvn0-c1b7fc5b39.json
 #token pickle
 token.pickle

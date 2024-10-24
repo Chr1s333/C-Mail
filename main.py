@@ -15,6 +15,8 @@ from gmail import gmail_page  # Import the Gmail page function
 from outlook import outlook_page
 from dashboard import dashboard_page
 
+
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -62,37 +64,32 @@ def check_if_email_exists(email):
     return False  # Email does not exist
 
 # Store the user's session state in cookies
-def set_login_session(username):
+# User session handling
+def set_login_session(username, email):
     cookies["logged_in"] = "true"
     cookies["username"] = username
+    cookies["email"] = email
     cookies.save()
 
-# Clear the user's session state from cookies
 def clear_login_session():
-    cookies["logged_in"] = ""  # Clear the cookie by setting it to an empty string
-    cookies["username"] = ""    # Clear the username cookie by setting it to an empty string
+    cookies["logged_in"] = ""
+    cookies["username"] = ""
+    cookies["email"] = ""
     cookies.save()
 
-# Shared sidebar for all pages
 def display_sidebar():
     if cookies.get("logged_in") == "true":
         username = cookies.get("username")
         st.sidebar.header(f"Welcome, {username}!")
-
-        # Sidebar buttons for Gmail and Outlook
-        st.sidebar.write("Quick Links:")
         if st.sidebar.button("Compose Gmail"):
             st.session_state["page"] = "gmail_page"
             st.rerun()
-
         if st.sidebar.button("Compose Outlook"):
             st.session_state["page"] = "outlook_page"
             st.rerun()
         if st.sidebar.button("Dashboard"):
             st.session_state["page"] = "Dashboard"
             st.rerun()
-
-        # Logout button in sidebar
         if st.sidebar.button("Logout"):
             clear_login_session()
             st.session_state["page"] = "login"
@@ -148,6 +145,13 @@ def signup():
             st.session_state["page"] = "login"
             st.rerun()
 
+# Function to store login session and email
+def set_login_session(username, email):
+    cookies["logged_in"] = "true"
+    cookies["username"] = username
+    cookies["email"] = email  # Store user email in cookies
+    cookies.save()
+
 # Function to display the Login page
 def login():
     st.header('Welcome to Cmail - A Mass Mailing Application')
@@ -166,7 +170,8 @@ def login():
                 try:
                     auth.sign_in_with_email_and_password(email, password)
                     username = email.split('@')[0]
-                    set_login_session(username)
+                    set_login_session(username, email)  # Store email and username
+                    st.session_state["user_email"] = email  # Store in session state
                     st.session_state["page"] = "welcome"
                     st.rerun()
                 except Exception as e:
@@ -176,14 +181,6 @@ def login():
                         st.error(f"Error logging in: {str(e)}")
             else:
                 st.error("Please enter both email and password.")
-
-    with col2:
-        st.write("")  # Placeholder for alignment
-
-    with col3:
-        if st.button("Don't have an account? Create now"):
-            st.session_state["page"] = "signup"
-            st.rerun()
 
 # Function to display the Welcome page
 def welcome():
@@ -220,15 +217,9 @@ def welcome():
 # Main function to manage page transitions
 # Main function to manage page transitions
 def main():
-    global email_delivery_log  # Declare to use the global variable
-
     if "page" not in st.session_state:
-        if cookies.get("logged_in") == "true":
-            st.session_state["page"] = "welcome"
-        else:
-            st.session_state["page"] = "login"
+        st.session_state["page"] = "login" if cookies.get("logged_in") != "true" else "welcome"
 
-    # Render the appropriate page based on session state
     if st.session_state["page"] == "login":
         login()
     elif st.session_state["page"] == "signup":
@@ -236,11 +227,12 @@ def main():
     elif st.session_state["page"] == "welcome":
         welcome()
     elif st.session_state["page"] == "gmail_page":
-        gmail_page(display_sidebar)  # Pass the log
+        gmail_page(display_sidebar)
     elif st.session_state["page"] == "outlook_page":
-        outlook_page(display_sidebar)  # Pass the log
+        outlook_page(display_sidebar)
     elif st.session_state["page"] == "Dashboard":
-        dashboard_page(display_sidebar)  # Pass the log
+        dashboard_page(display_sidebar)
+
 
 if __name__ == "__main__":
     main()
